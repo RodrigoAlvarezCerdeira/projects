@@ -13,19 +13,21 @@ import com.atos.talentsbatch.commons.SettlementConfig;
 
 import lombok.extern.slf4j.Slf4j;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @SpringBootApplication
-@EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
+@EnableAutoConfiguration(exclude = { DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class,
+        HibernateJpaAutoConfiguration.class })
 @EnableConfigurationProperties(SettlementConfig.class)
 @Slf4j
 public class TalentsBatchApplication {
-	public static void main(String[] args) {
-		log.debug("--Application Started--");
-		ConfigurableApplicationContext context =SpringApplication.run(TalentsBatchApplication.class, args);
-		
-		int exitCode = SpringApplication.exit(context);
-		System.exit(exitCode);
-	}
+    public static void main(String[] args) {
+
+        log.debug("--Application Started--");
+
+        ConfigurableApplicationContext context = SpringApplication.run(TalentsBatchApplication.class, args);
+
+        int exitCode = SpringApplication.exit(context);
+
+        System.exit(exitCode);
+    }
+
 }
