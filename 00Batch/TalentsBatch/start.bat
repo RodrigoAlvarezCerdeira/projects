@@ -1,1 +1,4 @@
-java -jar target/bdh-talents-0.0.1-SNAPSHOT.jar  --spring.config.location=C:/Users/A676366/Projects/workspace_psa/TalentsBatch/src/main/resources/configuration.yml --spring.batch.job.names=cashin
+set BDH_LOG=C://log
+java -jar target/bdh-talents-0.0.1-SNAPSHOT.jar  --spring.config.location=src\main\resources\configuration.yml --spring.batch.job.names=cashin
+set exitcode=%ERRORLEVEL%
+echo %exitcode%

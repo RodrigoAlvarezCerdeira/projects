@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-	<property name="USER_HOME" value="C:/Users/A676366/Projects/workspace_psa/TalentsBatch/target/logs" />
-
+	<property name="USER_HOME" value="${BDH_LOG}" />
+    <timestamp key="DATE_EXE" datePattern="ddMMyyyyHHmm"/>
+    
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<layout class="ch.qos.logback.classic.PatternLayout">
 			<Pattern>
@@ -13,14 +14,14 @@
 	
 
 	<appender name="FILE-ENGINE-SUMMARY" class="ch.qos.logback.core.FileAppender">
-		<file>${USER_HOME}/bdh-talents-summary.log</file>
+		<file>${USER_HOME}/bdh-cash-in-summary-${DATE_EXE}.log</file>
 		<encoder>
 			<pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
 		</encoder>
 	</appender>
 	
 	<appender name="FILE-ENGINE" class="ch.qos.logback.core.FileAppender">
-		<file>${USER_HOME}/bdh-talents.log</file>
+		<file>${USER_HOME}/bdh-cash-in-${DATE_EXE}.log</file>
 		<encoder>
 			<pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{35} - %msg%n</pattern>
 		</encoder>
@@ -33,6 +34,7 @@
 
 	<logger name="com.atos.talentsbatch.listeners.summary" level="debug" additivity="false">
 		<appender-ref ref="FILE-ENGINE-SUMMARY" />
+		<appender-ref ref="STDOUT" />
 	</logger>
 
 </configuration>
