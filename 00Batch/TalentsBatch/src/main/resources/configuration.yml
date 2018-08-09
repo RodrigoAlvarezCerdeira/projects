@@ -1,5 +1,5 @@
 settlement: 
-  fileInput: file:C://Users//A676366//Projects/workspace_psa//TalentsBatch//src//test//resources//cash_in2.csv
+  fileInput: file:C://Users//E541828//workspace_bdh_talents//bdh00Batch//src//test//resources//cash_in2.csv
   delimiter: ;
   colunms:
         - Account 
@@ -35,16 +35,16 @@ settlement:
         - OperationDate   
   fileOutput:
       - application: 1335549
-        path: C://Users//A676366//Projects//workspace_psa//TalentsBatch//target//files//
+        path: C://Users//E541828//workspace_bdh_talents//bdh00Batch//target//files//
         name: nemo
         type: csv
         
       - application: 100002;100003
-        path:  C://Users//A676366//Projects//workspace_psa//TalentsBatch//target//files//
+        path:  C://Users//E541828//workspace_bdh_talents//bdh00Batch//target//files//
         name: nemo2
         type: csv
         
       - application: 100004
-        path: C://Users//A676366//Projects//workspace_psa//TalentsBatch//target//files//
+        path: C://Users//E541828//workspace_bdh_talents//bdh00Batch//target//files//
         name:  nemo4
         type: csv   

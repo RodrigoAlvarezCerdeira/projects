@@ -19,14 +19,15 @@ import lombok.extern.slf4j.Slf4j;
 @EnableConfigurationProperties(SettlementConfig.class)
 @Slf4j
 public class TalentsBatchApplication {
+
     public static void main(String[] args) {
 
         log.debug("--Application Started--");
 
         ConfigurableApplicationContext context = SpringApplication.run(TalentsBatchApplication.class, args);
 
-        int exitCode = SpringApplication.exit(context);
-
+        int exitCode = SpringApplication.exit(context) > 1 ? 1 : 0;
+        log.debug("Exit Code...:  " + exitCode);
         System.exit(exitCode);
     }
 

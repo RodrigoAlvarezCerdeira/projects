@@ -1,14 +1,13 @@
 package com.atos.talentsbatch.jobs;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -22,11 +21,8 @@ import org.springframework.batch.core.step.skip.SkipPolicy;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
-import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
 import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
-import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
-import org.springframework.batch.item.support.ClassifierCompositeItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.classify.BackToBackPatternClassifier;
 import org.springframework.context.annotation.Bean;
@@ -38,9 +34,7 @@ import com.atos.talentsbatch.beans.SettlementBean;
 import com.atos.talentsbatch.commons.SettlementConfig;
 import com.atos.talentsbatch.commons.SettlementConfig.FileOut;
 import com.atos.talentsbatch.exceptions.FileVerificationSkipper;
-import com.atos.talentsbatch.listeners.WriteListener;
 import com.atos.talentsbatch.listeners.summary.JobSummaryNotificationListener;
-import com.atos.talentsbatch.reader.MyFileItemReader;
 import com.atos.talentsbatch.writer.MyClassifierCompositeItemWriter;
 import com.atos.talentsbatch.writer.MyFileItemWriter;
 import com.atos.talentsbatch.writer.StringHeaderWriter;
@@ -60,7 +54,7 @@ public class SettlementBatchMultiFileConfiguration {
 
     public List<String> filesList = new ArrayList<>();
 
-    public HashMap<String, String> hasMap = new HashMap<>();
+    public Map<String, String> hasMap = new HashMap<>();
 
     private String sHeaders = null;
 
@@ -69,28 +63,19 @@ public class SettlementBatchMultiFileConfiguration {
 
     @Bean
     public FlatFileItemReader<SettlementBean> reader() throws MalformedURLException {
-    	
-    	
-    	
-			try {
-				FileReader fr = new FileReader(new UrlResource(config.getFileInput()).getFile());
-			
-				BufferedReader bf = new BufferedReader(fr);
-	         	sHeaders = bf.readLine();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			 for (FileOut file : config.getFileOutput()) {
-				 File fileSys = new FileSystemResource(file.getPath() + file.getName() + "." + file.getType()).getFile();
-				 if(fileSys.exists()) fileSys.delete();
-			 }
 
-         return new FlatFileItemReaderBuilder<SettlementBean>().name("settlementItemReader").resource(new UrlResource(config.getFileInput()))
-			         .delimited().delimiter(config.getDelimiter()).names(config.getColunms())
-			         .fieldSetMapper(new BeanWrapperFieldSetMapper<SettlementBean>() { { setTargetType(SettlementBean.class); }	})
-			         .build();
-			  
+        try (FileReader fr = new FileReader(new UrlResource(config.getFileInput()).getFile()); BufferedReader bf = new BufferedReader(fr);) {
+            sHeaders = bf.readLine();
+        } catch (IOException e) {
+            log.error("IOException ", e);
+        }
+
+        BeanWrapperFieldSetMapper<SettlementBean> beenMapper = new BeanWrapperFieldSetMapper<>();
+        beenMapper.setTargetType(SettlementBean.class);
+
+        return new FlatFileItemReaderBuilder<SettlementBean>().name("settlementItemReader").resource(new UrlResource(config.getFileInput()))
+                .delimited().delimiter(config.getDelimiter()).names(config.getColunms()).fieldSetMapper(beenMapper).build();
+
     }
 
     @Bean
@@ -113,13 +98,8 @@ public class SettlementBatchMultiFileConfiguration {
         return new JobSummaryNotificationListener();
     }
 
-    @Bean
-    public WriteListener<SettlementBean> writeListener() {
-        return new WriteListener<SettlementBean>();
-    }
-
     public MyFileItemWriter<SettlementBean> writerFileOutput(String fileName) throws MalformedURLException {
-        MyFileItemWriter<SettlementBean> writer = new MyFileItemWriter<SettlementBean>();
+        MyFileItemWriter<SettlementBean> writer = new MyFileItemWriter<>();
         StringHeaderWriter headerWriter = null;
         if (sHeaders == null) {
             String exportFileHeader = String.join(",", config.getColunms());
@@ -127,16 +107,16 @@ public class SettlementBatchMultiFileConfiguration {
 
         } else {
             headerWriter = new StringHeaderWriter(sHeaders);
-            
+
         }
         writer.setHeaderCallback(headerWriter);
         // new file name
         writer.setResource(new FileSystemResource(fileName));
 
-        DelimitedLineAggregator<SettlementBean> delLineAgg = new DelimitedLineAggregator<SettlementBean>();
+        DelimitedLineAggregator<SettlementBean> delLineAgg = new DelimitedLineAggregator<>();
         delLineAgg.setDelimiter(config.getDelimiter());
 
-        BeanWrapperFieldExtractor<SettlementBean> fieldExtractor = new BeanWrapperFieldExtractor<SettlementBean>();
+        BeanWrapperFieldExtractor<SettlementBean> fieldExtractor = new BeanWrapperFieldExtractor<>();
         fieldExtractor.setNames(config.getColunms());
 
         delLineAgg.setFieldExtractor(fieldExtractor);
@@ -156,15 +136,15 @@ public class SettlementBatchMultiFileConfiguration {
         HashMap<String, MyFileItemWriter<SettlementBean>> map = new HashMap<>();
 
         for (FileOut file : config.getFileOutput()) {
-        	if(file.getApplication().contains(config.getDelimiter())){
-        		for (String sApp : file.getApplication().split(config.getDelimiter())) 
-        			map.put(sApp, writerFileOutput(file.getPath() + file.getName() + "." + file.getType()));
-        			
-        	}else	
-        		map.put(file.getApplication(), writerFileOutput(file.getPath() + file.getName() + "." + file.getType()));
+            if (file.getApplication().contains(config.getDelimiter())) {
+                for (String sApp : file.getApplication().split(config.getDelimiter()))
+                    map.put(sApp, writerFileOutput(file.getPath() + file.getName() + "." + file.getType()));
+
+            } else
+                map.put(file.getApplication(), writerFileOutput(file.getPath() + file.getName() + "." + file.getType()));
         }
-       
-        jobSummaryNotificationListener().setFilesOutput(config.getFileOutput());
+
+        jobSummaryNotificationListener().setSHeaders(sHeaders);
         classifier.setMatcherMap(map);
 
         MyClassifierCompositeItemWriter<SettlementBean> writer = new MyClassifierCompositeItemWriter<>();
@@ -182,10 +162,10 @@ public class SettlementBatchMultiFileConfiguration {
 
     @Bean
     public Step step1() throws MalformedURLException {
-        return ((FaultTolerantStepBuilder<SettlementBean, SettlementBean>) stepBuilderFactory.get("step1").<SettlementBean, SettlementBean> chunk(1000)
+        return ((FaultTolerantStepBuilder<SettlementBean, SettlementBean>) stepBuilderFactory.get("step1").<SettlementBean, SettlementBean>chunk(1000)
                 .reader(reader()).faultTolerant().skipPolicy(fileVerificationSkipper()).processor(processor()).writer(writer()))
                         .skip(IllegalStateException.class).noRetry(IllegalStateException.class).noRollback(IllegalStateException.class)
-                        .skipLimit(10000).listener(writeListener())
+                        .skipLimit(10000)
                         // .listener(skipListener())
                         // .listener(documentPackageReadyForProcessingListener())
                         // .listener(jobSummaryNotificationListener())

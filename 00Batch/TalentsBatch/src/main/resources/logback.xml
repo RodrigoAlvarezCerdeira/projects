@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-	<property name="USER_HOME" value="C:/Users/A676366/Projects/workspace_psa/Talents/target/log" />
-    <timestamp key="DATE_EXE" datePattern="ddMMyyyy"/>
+	<property name="USER_HOME" value="${BDH_LOG}" />
+    <timestamp key="DATE_EXE" datePattern="ddMMyyyyHHmm"/>
     
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<layout class="ch.qos.logback.classic.PatternLayout">
